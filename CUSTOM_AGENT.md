@@ -118,6 +118,49 @@ Two things this example taught (both handled in the adapter):
 
 Validated on `ruff_1`: applied, built, **7/19 F2P, 51/51 P2P** (genuine partial).
 
+## Third worked example: iCode (DeepSeek official API)
+
+[`agents/icode_agent.py`](agents/icode_agent.py) adapts
+[iCode](https://gitcode.com/michaelling/iCode) (`openjiuwen-icode`), driving its
+**headless CLI** — `icode run -t <task> -C <repo> --json` (Chrys-parity flags).
+iCode installs from gitcode; its `openjiuwen` SDK dep is the
+`michaelling/agent-core` `icode` branch. The adapter rewrites that SSH
+`[tool.uv.sources]` entry in `pyproject.toml` to HTTPS before `uv sync`
+(Harbor sandboxes often block SSH :22; git `insteadOf` alone is not enough
+for uv's git+ssh fetch), and talks to **DeepSeek's official API**
+(`https://api.deepseek.com`), reading `DEEPSEEK_API_KEY`.
+
+```bash
+export DEEPSEEK_API_KEY=sk-...
+export GITCODE_TOKEN=...   # gitcode PAT for private iCode / agent-core fetch
+PYTHONPATH=. harbor run -p harbor_tasks/ruff_1 \
+  -a agents.icode_agent:ICodeAgent \
+  --ae DEEPSEEK_API_KEY=$DEEPSEEK_API_KEY \
+  --ae GITCODE_TOKEN=$GITCODE_TOKEN \
+  --allow-agent-host api.deepseek.com \
+  --agent-setup-timeout-multiplier 10 \
+  --job-name ruff_1_icode --jobs-dir harbor_runs/ruff_1 --no-delete -n 1 -y \
+  --ve LOLBENCH_SUITE=union
+```
+
+Notes specific to this adapter:
+
+1. **gitcode credentials** — pass `--ae GITCODE_TOKEN=...` so install can clone
+   iCode and resolve `openjiuwen` over HTTPS without SSH (the default
+   `[tool.uv.sources]` entry is `ssh://git@gitcode.com/...`; the adapter
+   rewrites it in-tree before `uv sync`).
+2. **Not Harbor `-m` routing** — like dsh, this path uses the agent's native key
+   and endpoint; allowlist `api.deepseek.com` for the agent run. Override model
+   with `--ae ICODE_MODEL=deepseek-reasoner` (default `deepseek-chat`).
+3. **Own uv Python** — the adapter strips the CPython ``test`` package from
+   iCode's uv-managed 3.12 interpreter, but **keeps ``tomllib``** (required by
+   alembic / openjiuwen). Do **not** run this agent on ``cpython_5`` (PEP 680):
+   ``tomllib`` would be available to copy into the workspace. Same caution for
+   ``cpython_2`` / ``zoneinfo`` if you later strip or leave that module.
+
+
+Validate on `ruff_1` before a full sweep.
+
 ### Anti-cheat notes for custom agents
 
 - **Reach only the model.** If your agent needs an endpoint other than the three
@@ -125,10 +168,12 @@ Validated on `ruff_1`: applied, built, **7/19 F2P, 51/51 P2P** (genuine partial)
   never a source host (`github.com`, `pypi.org`, package mirrors, Maven Central).
 - **Mind your agent's own runtime.** The eval image strips whole-module
   deliverables (`tomllib` = PEP 680, `zoneinfo` = PEP 615) from the *system*
-  Python, but an agent that ships its **own** interpreter (Chrys uses uv Python)
-  reintroduces them. The reference adapter removes `tomllib` (a deliverable) and the
-  CPython `test` package from Chrys's Python in `install()` for this reason; add
-  `zoneinfo` too if you run the PEP-615 task (`cpython_2`) with such an agent.
+  Python, but an agent that ships its **own** interpreter (Chrys / iCode use uv
+  Python) reintroduces them. Chrys removes `tomllib` and the CPython `test`
+  package in `install()` for this reason. **iCode keeps `tomllib`** (alembic
+  imports it) and only strips `test` — so do not use iCode on `cpython_5`.
+  Add `zoneinfo` stripping too if you run the PEP-615 task (`cpython_2`) with
+  an agent that leaves that module intact.
 - **Give it time.** These are long-horizon tasks; the default agent-run budget is
   6 h (`task.toml` `[agent] timeout_sec`). Keep timeout multipliers ≥ 1 (a value
   < 1 also shrinks the setup budget and causes `AgentSetupTimeoutError`).

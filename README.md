@@ -99,6 +99,7 @@ different endpoint add `--allow-agent-host <host>`. See
 
 **Bring your own agent** — write a small `BaseInstalledAgent` adapter and run
 `-a your.module:ClassName`, or use `-a acp:<agent>@<version>` for ACP-compatible
-agents. See [CUSTOM_AGENT.md](CUSTOM_AGENT.md) and the two validated reference
-adapters: [`agents/chrys_agent.py`](agents/chrys_agent.py) (Chrys) and
-[`agents/dsh_agent.py`](agents/dsh_agent.py) (DeepSeek Harness).
+agents. See [CUSTOM_AGENT.md](CUSTOM_AGENT.md) and the reference adapters:
+[`agents/chrys_agent.py`](agents/chrys_agent.py) (Chrys),
+[`agents/dsh_agent.py`](agents/dsh_agent.py) (DeepSeek Harness), and
+[`agents/icode_agent.py`](agents/icode_agent.py) (iCode).
