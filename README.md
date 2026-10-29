@@ -1,7 +1,23 @@
 # LoLBench
 
-A benchmark for evaluating coding agents on **large, real-world feature
-implementations**.
+[![arXiv: 2609.37143](https://img.shields.io/badge/arXiv-2609.37143-b31b1b?style=flat)](https://arxiv.org/abs/2609.37143)
+[![Hugging Face: full dataset](https://img.shields.io/badge/Hugging%20Face-full%20dataset-FFD21E?style=flat)](https://huggingface.co/datasets/lolbench26/LoLBench)
+[![Tasks: 20](https://img.shields.io/badge/tasks-20-blue?style=flat)](#the-20-tasks)
+[![Projects: 5](https://img.shields.io/badge/projects-5-purple?style=flat)](#the-20-tasks)
+[![Docker images](https://img.shields.io/badge/Docker-images-2496ED?style=flat&logo=docker&logoColor=white)](https://hub.docker.com/r/smartdub26/lolbench)
+[![GitHub stars](https://img.shields.io/github/stars/SELab-Leibniz/LoLBench-Preview?style=flat)](https://github.com/SELab-Leibniz/LoLBench-Preview/stargazers)
+
+LoLBench evaluates coding agents on **large, real-world feature implementations**
+from human-written enhancement proposals. It tests how agents interpret user
+intent and high-level designs, derive concrete requirements, and implement them
+in existing software systems.
+
+The [LoLBench paper](https://arxiv.org/abs/2609.37143) introduces 100 tasks across
+29 software systems in five domains. The best of the 28 evaluated agents resolved
+14% of the full benchmark, highlighting challenges in locating relevant code and
+completing large changes. This repository provides a **20-task preview across five
+projects**. The full 100-task dataset is available on
+[Hugging Face](https://huggingface.co/datasets/lolbench26/LoLBench).
 
 Each LoLBench task asks an agent to implement a substantial feature described by
 its original design document — a CPython **PEP**, an Apache Flink **FLIP**, an
@@ -102,3 +118,20 @@ different endpoint add `--allow-agent-host <host>`. See
 agents. See [CUSTOM_AGENT.md](CUSTOM_AGENT.md) and the two validated reference
 adapters: [`agents/chrys_agent.py`](agents/chrys_agent.py) (Chrys) and
 [`agents/dsh_agent.py`](agents/dsh_agent.py) (DeepSeek Harness).
+
+## Citation
+
+If you use LoLBench in your research, please cite
+[LoLBench: Evaluating Coding Agents with Long-Horizon Proposals on Large Software Systems](https://arxiv.org/abs/2609.37143):
+
+```bibtex
+@misc{peng2026lolbench,
+  title         = {{LoLBench}: Evaluating Coding Agents with Long-Horizon Proposals on Large Software Systems},
+  author        = {Yun Peng and Zihan Wu and Zeyang Zhuang and Xin Zhou and Rui Shu and Xu Han and Chun Yong Chong and Yuan Wang and Jiakun Liu},
+  year          = {2026},
+  eprint        = {2609.37143},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.SE},
+  url           = {https://arxiv.org/abs/2609.37143}
+}
+```
